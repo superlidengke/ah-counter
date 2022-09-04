@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<!-- prettier-ignore-start -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+  <head>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="record.js"></script>
+    <style>
+      svg rect {
+          fill: orange;
+      }
+      svg text {
+           fill:black;
+          font: 15px sans-serif;
+          text-anchor: end;
+      }
+      svg text.left-align {
+        text-anchor: start;
+      }
+  </style>
+  </head>
+  <body>
+    <div id="app">{{ title }}</div>
+
+    <script>
+      const { createApp } = Vue
+      createApp({
+        data() {
+          return {
+            title: record.title
+          }
+        }
+      }).mount('#app')
+    </script>
+    <script type="module">
+      import * as d3 from "https://cdn.skypack.dev/d3@7";
+      const div = d3.selectAll("div");
+      const width = 1000;
+      const perSpeakerHeight = 100;
+      const speakerNameWidth = 100;
+      const perItemWidth = 80,
+        scaleFactor = 10;
+
+    function getBorderColor(speaker){
+      const role = speaker.role;
+      if(role.startsWith("Table Topic")){
+        return "green"
+      }else if (role.startsWith("Prepared")){
+        return "purple"
+      }else if (role.includes("Evaluator")){
+        return "blue"
+      }else{
+        return "black"
+      }
+    }
+
+    record.speakers.forEach(speaker => {
+      const speakerByRole = d3.select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", perSpeakerHeight)
+        .attr("style",`border:2px solid ${getBorderColor(speaker)}`)
+      speakerByRole.append("text")
+      .classed('left-align'  , true)
+       .attr("x", 1)
+       .attr("y", perSpeakerHeight/2)
+       .attr("dx", ".35em")
+       .text(speaker.speaker);
+      const fillerWordBar = speakerByRole.selectAll("g")
+        .data(speaker.fillerWords.filter(it => {
+          return it.count > 0;
+        }).sort((a,b) => b.count-a.count)
+        )
+        .enter()
+        .append("g")
+        .attr("transform", function(d, i) {
+              return `translate(${perItemWidth * i * 2+speakerNameWidth},0)`;
+        });
+      const maxCounter = Math.max(...speaker.fillerWords.map(it => it.count))
+      function getHeight(d){
+        return perSpeakerHeight * d.count/maxCounter - 10;
+      }
+      fillerWordBar.append("rect")
+        .attr("width", function(d) {
+           return perItemWidth;
+        })
+        .attr("y", function(d){
+          return perSpeakerHeight - getHeight(d);
+        })
+        .attr("height", function(d){
+          return getHeight(d);
+        });
+      fillerWordBar.append("text")
+       .attr("x", 0)
+       .attr("y", perSpeakerHeight -5)
+       .attr("dy", ".35em")
+       .text(function(d) { 
+         return d.word; 
+        });
+      fillerWordBar.append("text")
+       .attr("x", perItemWidth/2)
+       .attr("y", function(d){
+          return perSpeakerHeight - getHeight(d)-2
+       })
+       .attr("dy", ".35em")
+       .text(function(d) { 
+         return d.count; 
+        });
+      });
+   
+   
+   
+      
+      
+    </script>
+  </body>
+</html>
