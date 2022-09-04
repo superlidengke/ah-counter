@@ -28,7 +28,7 @@ const record = {
       role: 'Table Topic Speaker',
       fillerWords: [
         {word:"ah",count:2},
-        {word:"um",count:1},
+        {word:"um",count:3},
         {word:"er", count:1},
         {word:"and", count:0},
         {word:"you know", count:0},

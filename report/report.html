@@ -6,21 +6,44 @@
     <script src="https://unpkg.com/vue@3"></script>
     <script src="record.js"></script>
     <style>
-      svg rect {
+      svg:not(.sorted) rect {
           fill: orange;
       }
       svg text {
-           fill:black;
+          fill:black;
           font: 15px sans-serif;
           text-anchor: end;
       }
       svg text.left-align {
         text-anchor: start;
       }
+      svg text.red {
+          fill:red;
+          font: 25px sans-serif;
+      }
+      .menu{
+        margin-right: 5%;
+        float: right;
+      }
+      button{
+        margin-right: 20px;
+      }
   </style>
   </head>
   <body>
-    <div id="app">{{ title }}</div>
+    <div id="app">
+      <div class="title">
+        {{ title }}
+      </div>
+      <div class="menu">
+        <button id="drawByRole">By Role</button>
+        <button id="drawSorted">Sorted</button>
+      </div>
+      <br/>
+      <div class="panel">
+
+      </div>
+    </div> 
 
     <script>
       const { createApp } = Vue
@@ -34,12 +57,11 @@
     </script>
     <script type="module">
       import * as d3 from "https://cdn.skypack.dev/d3@7";
-      const div = d3.selectAll("div");
-      const width = 1000;
+      const width = 1400;
       const perSpeakerHeight = 100;
+      const perSpeakerWidth = width - 150;
       const speakerNameWidth = 100;
-      const perItemWidth = 80,
-        scaleFactor = 10;
+      const perItemWidth = 80;
 
     function getBorderColor(speaker){
       const role = speaker.role;
@@ -54,8 +76,26 @@
       }
     }
 
-    record.speakers.forEach(speaker => {
-      const speakerByRole = d3.select("body")
+    function getFillColorByIndex(idx){
+      console.log("color:"+idx)
+      const colorPool = ['#F87C7E','#F88F7F','#F9A381','#F9BB83','#FBCF85','#F4DC90','#EBE3A0','#E0EBB1','#D6F2C1','#CBFBD5'];
+      if(idx < colorPool.length){
+        return colorPool.at(idx)
+      }else{
+        return colorPool.at(-1)
+      }
+    }
+
+    function clearDrawArea(){
+      d3.select("div#app div.panel")
+        .selectAll("svg")
+        .remove()
+    }
+
+    function drawAllSpeakers(){
+      clearDrawArea();
+      record.speakers.forEach(speaker => {
+      const speakerByRole = d3.select("div#app div.panel")
         .append("svg")
         .attr("width", width)
         .attr("height", perSpeakerHeight)
@@ -107,11 +147,90 @@
          return d.count; 
         });
       });
-   
-   
-   
+    }
+
+    function drawSortedSpeakers(){
+      clearDrawArea()
+      record.speakers.forEach(speaker => {
+        const sumOfFillerWords = speaker.fillerWords
+        .map(it => it.count)
+        .reduce((a,b) => a+b,0)
+        speaker.sumOfFillerWords = sumOfFillerWords;
+      })
       
-      
+      const speakers = record.speakers.sort((a,b) => b.sumOfFillerWords - a.sumOfFillerWords)
+      const maxSumOfFillerWords = speakers.at(0).sumOfFillerWords;
+      speakers.forEach(speaker => {
+        speaker.fillerWords = speaker.fillerWords.filter(it => {
+            return it.count > 0;
+          }).sort((a,b) => b.count-a.count)
+        speaker.fillerWords.forEach((word, idx) => {
+          word.idx = idx
+        })
+        const speakerSvg = d3.select("div#app div.panel")
+          .append("svg")
+          .classed("sorted", true)
+          .attr("width", width)
+          .attr("height", perSpeakerHeight/2)
+          .attr("style",`border:1px solid ${getBorderColor(speaker)}`);
+        speakerSvg.append("text")
+          .classed('left-align'  , true)
+          .attr("x", 1)
+          .attr("y", perSpeakerHeight/3)
+          .attr("dx", ".35em")
+          .text(speaker.speaker);
+        let offSet = speakerNameWidth
+        function figureOffset(fillerWord){
+          const currentOffSet = offSet;
+          offSet +=  perSpeakerWidth * fillerWord.count / maxSumOfFillerWords
+          console.log(offSet)
+          return currentOffSet
+        }
+        const fillerWordBar = speakerSvg.selectAll("g")
+          .data(speaker.fillerWords)
+          .enter()
+          .append("g")
+          .attr("transform", function(d, i) {
+                return `translate(${figureOffset(d)},0)`;
+          });
+
+        fillerWordBar.append("rect")
+          .attr("width", function(d) {
+              return perSpeakerWidth * d.count / maxSumOfFillerWords ;
+          })
+          .attr("y", function(d){
+            return perSpeakerHeight/10;
+          })
+          .attr("height", perSpeakerHeight/3)
+          .attr('fill', function(d) {
+              return getFillColorByIndex(d.idx) ;
+          });
+        fillerWordBar.append("text")
+          .classed('left-align'  , true)
+          .attr("x", 0)
+          .attr("y", perSpeakerHeight/3)
+          .attr("dy", ".35em")
+          .text(function(d) { 
+            return `${d.word}:${d.count}`; 
+          });
+        
+        speakerSvg.append("text")
+          .classed('left-align'  , true)
+          .classed('red'  , true)
+          .attr("x", offSet)
+          .attr("y", perSpeakerHeight/5)
+          .attr("dx", ".35em")
+          .text(speaker.sumOfFillerWords);
+      })
+    }
+
+    d3.select("#drawByRole").on("click", drawAllSpeakers)
+    d3.select("#drawSorted").on("click", drawSortedSpeakers)
+
+
+    drawAllSpeakers();
+    // drawSortedSpeakers();
+
     </script>
   </body>
 </html>
