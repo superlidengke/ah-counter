@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<!-- prettier-ignore-start -->
+<!-- https://github.com/superlidengke/ah-counter -->
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
   <head>
     <script src="https://unpkg.com/vue@3"></script>
@@ -36,7 +36,7 @@
   <body>
     <div id="app">
       <div class="title">
-        {{ title }}
+        <span v-html="title"></span>
       </div>
       <div class="menu">
         <button id="drawByRole">By Role</button>
@@ -81,7 +81,6 @@
     }
 
     function getFillColorByIndex(idx){
-      console.log("color:"+idx)
       const colorPool = ['#F87C7E','#F88F7F','#F9A381','#F9BB83','#FBCF85','#F4DC90','#EBE3A0','#E0EBB1','#D6F2C1','#CBFBD5'];
       if(idx < colorPool.length){
         return colorPool.at(idx)
@@ -104,12 +103,17 @@
         .attr("width", width)
         .attr("height", perSpeakerHeight)
         .attr("style",`border:2px solid ${getBorderColor(speaker)}`)
-      speakerByRole.append("text")
-      .classed('left-align'  , true)
-       .attr("x", 1)
-       .attr("y", perSpeakerHeight/2)
-       .attr("dx", ".35em")
-       .text(speaker.speaker);
+      const speakerNameSvg = speakerByRole.append("text")
+        .classed('left-align'  , true)
+        .attr("x", 5)
+        .attr("y", perSpeakerHeight/2)
+      const [roleName, speakerName] = speaker.speaker.split('-')
+      speakerNameSvg.append("tspan")
+        .text(roleName)
+      speakerNameSvg.append("tspan")
+        .attr("x", 5)
+        .attr("dy", 20)
+        .text(speakerName)
       const fillerWordBar = speakerByRole.selectAll("g")
         .data(speaker.fillerWords.filter(it => {
           return it.count > 0;
@@ -125,9 +129,7 @@
         return perSpeakerHeight * d.count/maxCounter - 10;
       }
       fillerWordBar.append("rect")
-        .attr("width", function(d) {
-           return perItemWidth;
-        })
+        .attr("width", perItemWidth)
         .attr("y", function(d){
           return perSpeakerHeight - getHeight(d);
         })
@@ -177,12 +179,17 @@
           .attr("width", width)
           .attr("height", perSpeakerHeight/2)
           .attr("style",`border:1px solid ${getBorderColor(speaker)}`);
-        speakerSvg.append("text")
+        const speakerNameSvg = speakerSvg.append("text")
           .classed('left-align'  , true)
-          .attr("x", 1)
-          .attr("y", perSpeakerHeight/3)
-          .attr("dx", ".35em")
-          .text(speaker.speaker);
+          .attr("x", 5)
+          .attr("y", perSpeakerHeight/4);
+        const [roleName, speakerName] = speaker.speaker.split('-')
+        speakerNameSvg.append("tspan")
+          .text(roleName)
+        speakerNameSvg.append("tspan")
+          .attr("x", 5)
+          .attr("dy", 20)
+          .text(speakerName)
         let offSet = speakerNameWidth
         function figureOffset(fillerWord){
           const currentOffSet = offSet;

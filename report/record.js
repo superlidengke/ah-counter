@@ -1,5 +1,5 @@
 const record = {
-  title : 'HuTong TM Club Ah-Counter Report',
+  title : 'Hutong Bilingual Toastmasters Club - 532nd English Meeting Ah-Counter Report',
   speakers :[
     {
       speaker: 'TT1-Emily',
