@@ -17,6 +17,9 @@
       svg text.left-align {
         text-anchor: start;
       }
+      svg text.middle-align {
+        text-anchor: middle;
+      }
       svg text.red {
           fill:red;
           font: 25px sans-serif;
@@ -38,6 +41,7 @@
       <div class="menu">
         <button id="drawByRole">By Role</button>
         <button id="drawSorted">Sorted</button>
+        <button id="drawByWord">By Word</button>
       </div>
       <br/>
       <div class="panel">
@@ -206,7 +210,7 @@
               return getFillColorByIndex(d.idx) ;
           });
         fillerWordBar.append("text")
-          .classed('left-align'  , true)
+          .classed('left-align', true)
           .attr("x", 0)
           .attr("y", perSpeakerHeight/3)
           .attr("dy", ".35em")
@@ -224,12 +228,77 @@
       })
     }
 
+    function drawWordsPie(){
+      clearDrawArea();
+      const wordsPieSvg = d3.select("div#app div.panel")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", width/2)
+       const pieWidth = wordsPieSvg.attr("width");
+       const pieHeight = wordsPieSvg.attr("height");
+       const radius = Math.min(pieWidth, pieHeight) / 2;
+       const pieGroup = wordsPieSvg.append("g").attr("transform", "translate(" + pieWidth / 2 + "," + pieHeight / 2 + ")");
+       const fillerWordsData =[];
+
+       record.speakers.forEach(speaker => {
+          const fillerWords = speaker.fillerWords.filter(it => it.count>0)
+          fillerWords.forEach(fillerWord => {
+            const wordCount = fillerWordsData.find(it => it.word === fillerWord.word)
+            if(wordCount){
+              wordCount.count += fillerWord.count
+            }else{
+              // avoid push fillerWord directly
+              const newWordCount = {word:fillerWord.word,count:fillerWord.count}
+              fillerWordsData.push(newWordCount)
+            }
+          })
+        })
+
+       const color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#949a1c']);
+
+      // Generate the pie
+      const pie = d3.pie().value(function(d) { 
+            return d.count; 
+        });;
+
+      // Generate the arcs
+      const piePath = d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius-10);
+      
+      const label = d3.arc()
+            .outerRadius(radius)
+            .innerRadius(radius - 100);
+
+      //Generate groups
+      const arcs = pieGroup.selectAll("arc")
+            .data(pie(fillerWordsData))
+            .enter()
+            .append("g")
+            .attr("class", "arc")
+
+      //Draw arc paths
+      arcs.append("path")
+          .attr("fill", function(d, i) {
+              return color(i);
+          })
+          .attr("d", piePath);
+
+      arcs.append("text")
+        .classed('middle-align', true)
+        .attr("transform", function(d) { 
+              return "translate(" + label.centroid(d) + ")"; 
+            })
+        .text(d => `${d.data.word}:${d.data.count}`);
+    }
     d3.select("#drawByRole").on("click", drawAllSpeakers)
     d3.select("#drawSorted").on("click", drawSortedSpeakers)
+    d3.select("#drawByWord").on("click", drawWordsPie)
 
 
     drawAllSpeakers();
     // drawSortedSpeakers();
+    // drawWordsPie()
 
     </script>
   </body>
