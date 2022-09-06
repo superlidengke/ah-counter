@@ -206,16 +206,19 @@
           });
 
         fillerWordBar.append("rect")
-          .attr("width", function(d) {
-              return perSpeakerWidth * d.count / maxSumOfFillerWords ;
-          })
           .attr("y", function(d){
             return perSpeakerHeight/10;
           })
           .attr("height", perSpeakerHeight/3)
           .attr('fill', function(d) {
               return getFillColorByIndex(d.idx) ;
-          });
+          })
+          .transition()
+          .duration(1000)
+          .attr("width", function (d) {
+            return perSpeakerWidth * d.count / maxSumOfFillerWords;
+          })
+          ;
         fillerWordBar.append("text")
           .classed('left-align', true)
           .attr("x", 0)
@@ -231,6 +234,8 @@
           .attr("x", offSet)
           .attr("y", perSpeakerHeight/5)
           .attr("dx", ".35em")
+          .transition()
+          .delay(1000)
           .text(speaker.sumOfFillerWords);
       })
     }
@@ -289,7 +294,15 @@
           .attr("fill", function(d, i) {
               return color(i);
           })
-          .attr("d", piePath);
+          .attr("d", piePath)
+          .transition().duration(500)
+          .attrTween('d', function (d) {
+            const angleInterpolate = d3.interpolate(d.startAngle + 0.1, d.endAngle);
+            return function (t) {
+              d.endAngle = angleInterpolate(t);
+              return piePath(d);
+            }
+        })
 
       arcs.append("text")
         .classed('middle-align', true)
