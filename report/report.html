@@ -164,7 +164,7 @@
         speaker.sumOfFillerWords = sumOfFillerWords;
       })
       
-      const speakers = record.speakers.sort((a,b) => b.sumOfFillerWords - a.sumOfFillerWords)
+      const speakers = [...record.speakers].sort((a,b) => b.sumOfFillerWords - a.sumOfFillerWords)
       const maxSumOfFillerWords = speakers.at(0).sumOfFillerWords;
       speakers.forEach(speaker => {
         speaker.fillerWords = speaker.fillerWords.filter(it => {
