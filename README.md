@@ -11,3 +11,6 @@
 
 ### List used packages
 `pip freeze > requirements.txt`
+
+### CICD
+https://app.circleci.com/pipelines/github/superlidengke
