@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
   <head>
     <script src="https://unpkg.com/vue@3"></script>
-    <script src="record.js"></script>
+    <script src="record_t.js"></script>
     <style>
       svg:not(.sorted) rect {
           fill: orange;
@@ -94,10 +94,31 @@
         .selectAll("svg")
         .remove()
     }
+    
+    function getSpeakersForCountReport(){
+      if(record.version.startsWith("v1.")){
+        return record.speakers
+      }else if (record.version.startsWith("v2.")){
+        return record.speakers.map(speaker => {
+          const fillerWords = speaker.fillerWords;
+          const fillerWordsMap = fillerWords.reduce((acc, word) => {
+            acc[word.word] = (acc[word.word] || 0) + 1;
+            return acc;
+          }, {});
+          const fillerWordsArray = Object.keys(fillerWordsMap).map(key => {
+            return {word:key, count:fillerWordsMap[key]}
+          })
+          return {...speaker, fillerWords:fillerWordsArray}
+        })
+       
+      }else{
+        throw new Error("Unsupported report version!")
+      }
+    }
 
     function drawAllSpeakers(){
       clearDrawArea();
-      record.speakers.forEach(speaker => {
+      getSpeakersForCountReport().forEach(speaker => {
       const speakerByRole = d3.select("div#app div.panel")
         .append("svg")
         .attr("width", width)
@@ -157,14 +178,18 @@
 
     function drawSortedSpeakers(){
       clearDrawArea()
-      record.speakers.forEach(speaker => {
+      console.log("drawSortedSpeakers")
+      console.log(getSpeakersForCountReport())
+      let speakersCount = getSpeakersForCountReport()
+      speakersCount.forEach(speaker => {
+        console.log(speaker)
         const sumOfFillerWords = speaker.fillerWords
         .map(it => it.count)
         .reduce((a,b) => a+b,0)
         speaker.sumOfFillerWords = sumOfFillerWords;
       })
       
-      const speakers = [...record.speakers].sort((a,b) => b.sumOfFillerWords - a.sumOfFillerWords)
+      const speakers = [...speakersCount].sort((a,b) => b.sumOfFillerWords - a.sumOfFillerWords)
       const maxSumOfFillerWords = speakers.at(0).sumOfFillerWords;
       speakers.forEach(speaker => {
         speaker.fillerWords = speaker.fillerWords.filter(it => {
@@ -252,7 +277,7 @@
        const pieGroup = wordsPieSvg.append("g").attr("transform", "translate(" + pieWidth / 2 + "," + pieHeight / 2 + ")");
        const fillerWordsData =[];
 
-       record.speakers.forEach(speaker => {
+       getSpeakersForCountReport().forEach(speaker => {
           const fillerWords = speaker.fillerWords.filter(it => it.count>0)
           fillerWords.forEach(fillerWord => {
             const wordCount = fillerWordsData.find(it => it.word === fillerWord.word)

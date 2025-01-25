@@ -1,4 +1,5 @@
 const record = {
+  version: "v1.0:count-only",
   title:
     "Hutong Bilingual Toastmasters Club - 532nd English Meeting Ah-Counter Report",
   speakers: [

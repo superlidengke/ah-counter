@@ -1,0 +1,60 @@
+const record = {
+  version: "v2.0:with-time",
+  title:
+    "Ometesando Bilingual Toastmasters Club - 532nd English Meeting Ah-Counter Report",
+  speakers: [
+    {
+      speaker: "TT1",
+      role: "Table Topic Speaker",
+      startT: "14:20:00",
+      endT: "14:22:00",
+      fillerWords: [
+        { word: "er", at: "14:20:10" },
+        { word: "er", at: "14:20:13" },
+        { word: "um", at: "14:20:20" },
+        { word: "er", at: "14:20:40" },
+        { word: "er", at: "14:21:20" },
+        { word: "to", at: "14:21:40" },
+        { word: "um", at: "14:21:49" }, 
+      ],
+    },
+    {
+      speaker: "TT2",
+      role: "Table Topic Speaker",
+      startT: "14:23:00",
+      endT: "14:25:20",
+      fillerWords: [
+        { word: "er", at: "14:23:20" },
+        { word: "so", at: "14:23:30" },
+        { word: "um", at: "14:23:45" },
+        { word: "and", at: "14:24:00" },
+        { word: "so", at: "14:24:30" },
+        { word: "um", at: "14:24:45" },
+        { word: "you know", at: "14:24:56" },
+        { word: "you know", at: "14:25:16" },
+      ],
+    },
+    {
+      speaker: "TT3",
+      role: "Table Topic Speaker",
+      startT: "14:26:00",
+      endT: "14:28:25",
+      fillerWords: [
+        { word: "well", at: "14:26:10" },
+        { word: "like", at:  "14:26:16" },
+        { word: "er", at:  "14:26:24" },
+        { word: "well", at: "14:26:29" },
+        { word: "like", at:  "14:26:37" },
+        { word: "er", at:  "14:26:48" },
+        { word: "yeah", at:  "14:27:00" },
+        { word: "so", at:  "14:27:10" },
+        { word: "yeah", at:  "14:27:20" },
+        { word: "so", at:  "14:27:33" },
+        { word: "yeah", at:  "14:27:45" },
+        { word: "so", at:  "14:27:56" },
+        { word: "well", at: "14:28:12" },
+        { word: "like", at:  "14:28:22" },
+      ],
+    }
+  ],
+};
